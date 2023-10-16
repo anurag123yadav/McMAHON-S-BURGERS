@@ -1,0 +1,57 @@
+public class MMBurgers implements MMBurgersInterface {
+    // Define data structures and variables as needed
+
+    public MMBurgers() {
+        // Initialize data structures
+    }
+
+    @Override
+    public boolean isEmpty() {
+        // Check if there are more events to simulate
+    }
+
+    @Override
+    public void setK(int k) throws IllegalNumberException {
+        // Initialize billing counters
+    }
+
+    @Override
+    public void setM(int m) throws IllegalNumberException {
+        // Set the size of the griddle
+    }
+
+    @Override
+    public void advanceTime(int t) throws IllegalNumberException {
+        // Simulate events until time t
+    }
+
+    @Override
+    public void arriveCustomer(int id, int t, int numb) throws IllegalNumberException {
+        // Handle customer arrival event
+    }
+
+    @Override
+    public int customerState(int id, int t) throws IllegalNumberException {
+        // Get the state of a customer at a given time
+    }
+
+    @Override
+    public int griddleState(int t) throws IllegalNumberException {
+        // Get the number of burger patties on the griddle at a given time
+    }
+
+    @Override
+    public int griddleWait(int t) throws IllegalNumberException {
+        // Get the number of burger patties waiting to be cooked at a given time
+    }
+
+    @Override
+    public int customerWaitTime(int id) throws IllegalNumberException {
+        // Calculate and return the total wait time of a customer
+    }
+
+    @Override
+    public float avgWaitTime() {
+        // Calculate and return the average wait time per customer
+    }
+}
