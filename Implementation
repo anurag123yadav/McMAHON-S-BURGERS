@@ -1,0 +1,176 @@
+import java.util.*;
+
+public class MMBurgers implements MMBurgersInterface {
+    private int K; // Number of billing counters
+    private int M; // Size of the griddle
+    private int time; // Global simulation time
+
+    // Queue for billing counters
+    private Queue<Integer>[] billingQueues;
+
+    // Priority queue for ordering events
+    private PriorityQueue<Event> eventQueue;
+
+    // Map to track customer states
+    private Map<Integer, Customer> customers;
+
+    // Griddle to manage cooking patties
+    private Queue<Customer> griddle;
+
+    public MMBurgers() {
+        // Initialize data structures and variables
+        time = 0;
+        billingQueues = new Queue[K];
+        eventQueue = new PriorityQueue<>();
+        customers = new HashMap<>();
+        griddle = new LinkedList<>();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return eventQueue.isEmpty();
+    }
+
+    @Override
+    public void setK(int k) throws IllegalNumberException {
+        if (k < 1) {
+            throw new IllegalNumberException();
+        }
+        K = k;
+    }
+
+    @Override
+    public void setM(int m) throws IllegalNumberException {
+        if (m < 1) {
+            throw new IllegalNumberException();
+        }
+        M = m;
+    }
+
+    @Override
+    public void advanceTime(int t) throws IllegalNumberException {
+        if (t < time) {
+            throw new IllegalNumberException();
+        }
+
+        while (time < t) {
+            // Simulate events until time t
+            Event nextEvent = eventQueue.poll();
+            if (nextEvent != null) {
+                time = nextEvent.getTime();
+                nextEvent.execute(this);
+            } else {
+                // No more events to simulate
+                time = t;
+            }
+        }
+    }
+
+    @Override
+    public void arriveCustomer(int id, int t, int numb) throws IllegalNumberException {
+        if (t < time || numb <= 0) {
+            throw new IllegalNumberException();
+        }
+
+        // Create a new customer and add them to the billing queue
+        Customer newCustomer = new Customer(id, t, numb);
+        customers.put(id, newCustomer);
+
+        // Find the shortest billing queue
+        int shortestQueue = findShortestQueue();
+        newCustomer.setQueueNumber(shortestQueue);
+
+        // Add the arrival event to the queue
+        Event arrivalEvent = new ArrivalEvent(t, newCustomer);
+        eventQueue.add(arrivalEvent);
+    }
+
+    @Override
+    public int customerState(int id, int t) throws IllegalNumberException {
+        if (t < time) {
+            throw new IllegalNumberException();
+        }
+
+        if (!customers.containsKey(id)) {
+            return 0; // Customer has not arrived until time t
+        }
+
+        Customer customer = customers.get(id);
+        return customer.getState(t);
+    }
+
+    @Override
+    public int griddleState(int t) throws IllegalNumberException {
+        if (t < time) {
+            throw new IllegalNumberException();
+        }
+
+        // Calculate the number of burger patties on the griddle at time t
+        int griddleState = 0;
+        for (Customer customer : griddle) {
+            griddleState += customer.getBurgersOnGriddle(t);
+        }
+        return griddleState;
+    }
+
+    @Override
+    public int griddleWait(int t) throws IllegalNumberException {
+        if (t < time) {
+            throw new IllegalNumberException();
+        }
+
+        // Calculate the number of burger patties waiting to be cooked at time t
+        int griddleWait = 0;
+        for (Customer customer : customers.values()) {
+            griddleWait += customer.getBurgersWaitingToCook(t);
+        }
+        return griddleWait;
+    }
+
+    @Override
+    public int customerWaitTime(int id) throws IllegalNumberException {
+        if (!customers.containsKey(id)) {
+            throw new IllegalNumberException();
+        }
+
+        Customer customer = customers.get(id);
+        return customer.getTotalWaitTime();
+    }
+
+    @Override
+    public float avgWaitTime() {
+        int totalWaitTime = 0;
+        int customerCount = 0;
+
+        for (Customer customer : customers.values()) {
+            totalWaitTime += customer.getTotalWaitTime();
+            customerCount++;
+        }
+
+        if (customerCount == 0) {
+            return 0.0f;
+        }
+
+        return (float) totalWaitTime / customerCount;
+    }
+
+    // Helper method to find the shortest billing queue
+    private int findShortestQueue() {
+        int shortestQueue = 1;
+        int shortestLength = billingQueues[0].size();
+
+        for (int i = 1; i < K; i++) {
+            int length = billingQueues[i].size();
+            if (length < shortestLength) {
+                shortestQueue = i + 1;
+                shortestLength = length;
+            }
+        }
+
+        return shortestQueue;
+    }
+
+    public static void main(String[] args) {
+        // Your test code can go here
+    }
+}
